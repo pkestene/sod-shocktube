@@ -2,15 +2,26 @@
 import sod
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 if __name__ == '__main__':
 
-    gamma = 1.4
+    gamma = 1.666
     dustFrac = 0.0
     npts = 500
-    t = 0.2
+    t = 0.25
     left_state = (1,1,0)
     right_state = (0.1, 0.125, 0.)
+
+    # EulerPablo data
+    dataEP = pd.read_csv('./sod_data_4_7.csv')
+    etot_num = dataEP['e_tot'].values
+    rho_num = dataEP['rho'].values
+    rho_vx_num = dataEP['rho_vx'].values
+    ec_num = 0.5 * rho_vx_num * rho_vx_num / rho_num
+    p_num = (gamma-1)*(etot_num-ec_num)
+    vx_num = rho_vx_num / rho_num
+    x_num = dataEP['Points:0'].values
 
     # left_state and right_state set pressure, density and u (velocity)
     # geometry sets left boundary on 0., right boundary on 1 and initial
@@ -34,19 +45,25 @@ if __name__ == '__main__':
         print('{0:10} : {1}'.format(region, vals))
 
     # Finally, let's plot the solutions
-    f, axarr = plt.subplots(len(values)-1, sharex=True)
+    #f, axarr = plt.subplots(len(values)-1, sharex=True)
+    f, axarr = plt.subplots(3, sharex=True)
 
     axarr[0].plot(values['x'], values['p'], linewidth=1.5, color='b')
+    axarr[0].plot(x_num, p_num, linewidth=1.5, color='b')
     axarr[0].set_ylabel('pressure')
     axarr[0].set_ylim(0, 1.1)
 
     axarr[1].plot(values['x'], values['rho'], linewidth=1.5, color='r')
+    axarr[1].plot(x_num, rho_num, linewidth=1.0, color='r')
     axarr[1].set_ylabel('density')
     axarr[1].set_ylim(0, 1.1)
 
     axarr[2].plot(values['x'], values['u'], linewidth=1.5, color='g')
+    axarr[2].plot(x_num, vx_num, linewidth=1.5, color='g')
     axarr[2].set_ylabel('velocity')
     
-    plt.suptitle('Shocktube results at t={0}\ndust fraction = {1}, gamma={2}'\
-                 .format(t, dustFrac, gamma))
+    #plt.suptitle('Shocktube results at t={0}\ndust fraction = {1}, gamma={2}'\
+    #             .format(t, dustFrac, gamma))
+    plt.suptitle('Shocktube results at t={0}\ngamma={1}'\
+                 .format(t, gamma))
     plt.show()
